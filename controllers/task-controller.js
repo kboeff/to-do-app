@@ -1,5 +1,4 @@
 const Task = require('../models/Task');
-let currentID = null;
 
 module.exports = {
   getIndex: function (req, res) {
@@ -26,32 +25,33 @@ module.exports = {
   getEdit: function (req, res) {
     // TODO: get the task for editing, pass it to the edit view and render it
     Task.findById(req.params.id)
-        .then(tasks => { 
-          // console.log(tasks);
-          currentID = req.params.id;
-          console.log(currentID, 'id GET');
-          return res.render('edit', { 
+        .then(tasks => res.render('edit', { 
             task: {
+              _id: req.params.id,
               title: tasks.title,
               open: tasks.status === 'Open',
               inProgress: tasks.status === 'In Progress',
               finished: tasks.status === 'Finished'
-            }  
-        })
-    });
+            }
+          })
+        );
   },
   postEdit: function (req, res) {
     // TODO: update the task and redirect to index view
-    Task.findByIdAndUpdate(currentID, { title: req.body.title, status: req.body.status }, (res) => {
-      console.log(currentID, 'id POST');
-      return res.redirect('/');
-    })
-      .catch((err) => console.log(err));
+    
+    Task.findByIdAndUpdate(req.params.id, req.body)
+      .then(() => res.redirect('/'));
   },
   getDelete: function (req, res) {
-    // TODO: get the task for deleting, pass it to the detele view and render it
+     // TODO: get the task for deleting, pass it to the detele view and render it
+    
+    Task.findById(req.params.id)
+      .then((task) => res.render('delete', {task}));
   },
   postDelete: function (req, res) {
     // TODO: delete the task and redirect to the index view
-  }
+    
+    Task.findByIdAndDelete(req.params.id, req.body)
+      .then(() => res.redirect('/'));
+    }
 };
